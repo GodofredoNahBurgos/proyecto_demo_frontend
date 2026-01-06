@@ -1,11 +1,31 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 
 const AuthContext = createContext()
 
 export const AuthProvider = ({ children }) => {
-  const [isAuth, setIsAuth] = useState(
-    !!localStorage.getItem('accessToken')
-  )
+  
+  const [isAuth, setIsAuth] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+
+    const token = localStorage.getItem('accessToken')
+    setIsAuth(!!token)
+    setLoading(false)
+    
+    const syncAuth = () => {
+      const newToken = localStorage.getItem('accessToken')
+      if (!newToken && isAuth) {
+        logout()
+      }
+    }
+
+    window.addEventListener('storage', syncAuth)
+
+    return () => {
+      window.removeEventListener('storage', syncAuth)
+    }
+  }, [])
 
   const login = ({ accessToken, refreshToken }) => {
     localStorage.setItem('accessToken', accessToken)
@@ -19,21 +39,9 @@ export const AuthProvider = ({ children }) => {
     setIsAuth(false)
   }
 
-  useEffect(() => {
-    const syncAuth = () => {
-      const token = localStorage.getItem('accessToken')
-      if (!token) {
-        logout()
-      }
-    }
-
-    window.addEventListener('storage', syncAuth)
-
-    return () => {
-      window.removeEventListener('storage', syncAuth)
-    }
-  }, [])
-
+  if (loading) {
+    return null // o un componente de loading
+  }
 
   return (
     <AuthContext.Provider value={{ isAuth, login, logout }}>

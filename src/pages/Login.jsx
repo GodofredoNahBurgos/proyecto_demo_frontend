@@ -32,7 +32,9 @@ export default function Login() {
 
   return (
     <form onSubmit={handleSubmit}>
+      <label htmlFor="">Contraseña</label>
       <input type="email" onChange={e => setEmail(e.target.value)} />
+      <label htmlFor="">Contraseña</label>
       <input type="password" onChange={e => setPassword(e.target.value)} />
       <button type="submit" >Login</button>
     </form>
